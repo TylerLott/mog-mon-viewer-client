@@ -1,0 +1,8 @@
+FROM node:16.3.0
+ENV NODE_ENV=production
+WORKDIR /viewer-client
+COPY ["package.json", "package-lock.json", "buildStart.js", "build/"]
+COPY . .
+CMD ["node", "buildStart.js"]
+
+
