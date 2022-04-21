@@ -1,21 +1,21 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Ludwig Mondays",
+  "name": "Ludwig Mondays",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "1x.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },
     {
-      "src": "logo192.png",
+      "src": "1x.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "28x28"
     },
     {
-      "src": "logo512.png",
+      "src": "lud-twitter.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "900x506"
     }
   ],
   "start_url": ".",

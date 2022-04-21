@@ -1,11 +1,16 @@
 import React from "react"
-import Chart from "../../components/Chart/Chart"
+import { PageContainer } from "../../styles/styleGlobalComponents"
+import TopLogo from "../../components/TopLogo/TopLogo"
+import { LoginPage } from "./LoginComponents"
 
-const Login = () => {
+const Login = ({ handleLogin, handleRoomcode }) => {
   return (
-    <div style={{ height: "500px", width: "500px" }}>
-      <Chart />
-    </div>
+    <PageContainer>
+      <LoginPage>
+        <TopLogo />
+        <div>Oauth prompts</div>
+      </LoginPage>
+    </PageContainer>
   )
 }
 
