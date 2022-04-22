@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useReducer } from "react"
 import ReactGA from "react-ga"
 import TopLogo from "../../components/TopLogo/TopLogo"
 import { PageContainer, UIBoolButton } from "../../styles/styleGlobalComponents"
@@ -15,20 +15,25 @@ import {
   TeamInfoContainer,
 } from "./ViewerComponents"
 import socketIOClient from "socket.io-client"
+import { changeCount, appendHist } from "../../reducers/reducers"
 
 const AD_LINK = "localhost"
-let ws
 
 const Viewer = () => {
   const [currentTeam, setCurrentTeam] = useState(null)
-  const [waiting, setWaiting] = useState({}) // last submit time
+  const [waitTime, setWaitTime] = useState({}) // last submit time
   const [canSubmit, setCanSubmit] = useState(false)
-  const [thresh, setThresh] = useState(1000)
-  const [counts, setCounts] = useState({}) // obj with each team
-  const [hist, setHist] = useState({}) // obj with each team
+  const [settings, setSettings] = useState({
+    thresh: 1000,
+    timeout: 60,
+    cooldown: 600,
+  })
   const [teams, setTeams] = useState({}) // obj of all teams + their players
   const [players, setPlayers] = useState({}) // obj of all players + stats
+  const [hist, dispatchHist] = useReducer(appendHist, {})
+  const [counts, dispatchCounts] = useReducer(changeCount, {})
 
+  // FUNCTIONS
   const handleClick = (socket) => {
     ReactGA.event({
       category: "viewer",
@@ -47,9 +52,17 @@ const Viewer = () => {
     })
   }
 
+  const appendToHist = () => {
+    Object.keys(teams).forEach((team) => {
+      dispatchHist({ type: "append", team: team, newCount: counts[team] })
+    })
+  }
+
+  // USE EFFECTS
   useEffect(() => {
     // set push the counts to hist in setTimeout
     // update every .5 seconds
+    setTimeout(() => appendToHist(), 500)
   }, [hist])
 
   useEffect(() => {
@@ -60,7 +73,7 @@ const Viewer = () => {
     // set activeTeam to first team returned
     //
     //
-    // ws = socketIOClient("socketurl", {
+    // socket = socketIOClient("socketurl", {
     //   auth: {
     //     token: "token",
     //   },
@@ -88,9 +101,9 @@ const Viewer = () => {
               <MainContainerTitle>Teamname</MainContainerTitle>
             </MainContainerTop>
             <MainContainerMid>
-              <Chart thresh={thresh} data={hist[currentTeam]} />
+              <Chart thresh={settings.thresh} data={hist[currentTeam]} />
               <MainContainerNumber>number or timeleft</MainContainerNumber>
-              <UIBoolButton track={!waiting}>attack or timeleft</UIBoolButton>
+              <UIBoolButton track={!canSubmit}>attack or timeleft</UIBoolButton>
               <TeamInfoContainer>team info</TeamInfoContainer>
             </MainContainerMid>
           </div>
