@@ -6,7 +6,7 @@ export const ViewerContainer = styled.div`
 `
 
 export const TeamListContainer = styled.div`
-  width: 20%;
+  width: 30%;
   height: 60vh;
   margin-top: 20px;
   margin-right: 20px;
@@ -29,7 +29,7 @@ export const TeamListContainer = styled.div`
 `
 
 export const MainContainer = styled.div`
-  width: 80%;
+  width: 60%;
   margin-top: 20px;
   padding: 25px;
   background-color: ${COLORS.BACKGROUND_COLOR};
@@ -82,7 +82,6 @@ export const TeamInfoContainer = styled.div`
   margin-top: 20px;
   background-color: white;
   width: 100%;
-  border-radius: 0.4em;
 `
 
 export const ThreshContainer = styled.h3`
@@ -90,4 +89,52 @@ export const ThreshContainer = styled.h3`
   padding: 0;
   height: 50px;
   font-size: 1.5em;
+`
+
+export const TeamButton = styled.button`
+  margin: 5px 0 0 5px;
+  padding: 5px;
+  background-color: rgba(0, 0, 0, 0);
+  border: 2px solid ${COLORS.TEXT_COLOR};
+  color: ${COLORS.TEXT_COLOR};
+  font-weight: 600;
+  border-radius: 0.5em;
+  transition: 0.3s;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+  &:focus {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+`
+
+export const PlayersContainer = styled.div`
+  display: grid;
+  grid-template-columns: 30% 23% 23% 23%;
+  background-color: ${COLORS.BACKGROUND_LINES};
+  padding: 20px;
+`
+export const PlayerName = styled.h3`
+  grid-column: 1;
+  margin: 0;
+  font-size: 1.5vw;
+`
+export const PlayerKills = styled.h3`
+  grid-column: 2;
+  margin: 0;
+  font-size: 1.5vw;
+  justify-self: center;
+`
+export const PlayerPlacement = styled.h3`
+  grid-column: 3;
+  margin: 0;
+  font-size: 1.5vw;
+  justify-self: center;
+`
+export const PlayerTotal = styled.h3`
+  grid-column: 4;
+  margin: 0;
+  font-size: 1.5vw;
+  justify-self: center;
 `

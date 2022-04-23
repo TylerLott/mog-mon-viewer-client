@@ -13,15 +13,28 @@ import {
   MainContainerNumber,
   TeamInfoContainer,
   ThreshContainer,
+  TeamButton,
+  PlayerName,
+  PlayerKills,
+  PlayerPlacement,
+  PlayerTotal,
+  PlayersContainer,
 } from "./ViewerComponents"
 import socketIOClient from "socket.io-client"
-import { changeCount, appendHist } from "../../reducers/reducers"
+import { changeCount } from "../../reducers/reducers"
 import Countdown from "react-countdown"
 import * as COLORS from "../../styles/colors"
 
 const AD_LINK = "localhost"
+let WS_HOST = "ludwigmonday.gg"
+let WS_PATH = "/api/viewer"
+if (process.env.NODE_ENV !== "production") {
+  WS_HOST = "localhost:7000"
+  WS_PATH = ""
+}
 
 const Viewer = () => {
+  const [ws, setWs] = useState(null)
   const [currentTeam, setCurrentTeam] = useState({
     name: "loading...",
     createdBy: "",
@@ -42,16 +55,6 @@ const Viewer = () => {
   })
 
   // FUNCTIONS
-  const handleClick = (socket) => {
-    ReactGA.event({
-      category: "viewer",
-      action: "attack",
-      label: currentTeam,
-    })
-    // make websocket call
-    socket.emit("attack")
-  }
-
   const handleAdClick = () => {
     ReactGA.event({
       category: "viewer",
@@ -60,19 +63,11 @@ const Viewer = () => {
     })
   }
 
-  // Random component
-  const Completionist = () => {
-    if (waitTime < Date.now()) {
-      setCanSubmit(true)
-      setWaitTime(Date.now() + settings.timeout)
-    }
-  }
-
   // Renderer callback with condition
   const renderer = ({ hours, minutes, seconds, completed }) => {
     if (completed) {
       // Render a completed state
-      return <Completionist />
+      setCanSubmit(true)
     } else {
       // Render a countdown
       return (
@@ -84,37 +79,55 @@ const Viewer = () => {
   }
 
   const handleAttack = () => {
+    ws.emit("attack", {
+      team: currentTeam.name,
+    })
+    setWaitTime(() => Date.now() + settings.timeout)
     setCanSubmit(() => false)
-    setWaitTime(Date.now() + settings.timeout)
+    ReactGA.event({
+      category: "viewer",
+      action: "attack",
+      label: currentTeam,
+    })
   }
 
   useEffect(() => {
-    // connect to websocket -> set socket
     // set teams based on websocket
     // set players based on websocket
     // set counts based on websocket
     // set activeTeam to first team returned
     //
     //
-    let socket = socketIOClient("localhost:7000", {
-      path: "",
+    let socket = socketIOClient(WS_HOST, {
+      path: WS_PATH,
     })
+    setWs(socket)
+
     socket.on("add-teams", (teams) => {
+      if (currentTeam.name === "loading...") {
+        setCurrentTeam(teams[0])
+      }
       let t = teams.reduce((acc, cur) => {
         acc[cur.name] = cur
         return acc
       }, {})
       setTeams(t)
+      Object.keys(t).forEach((team) => {
+        dispatchCounts({ type: "add-team", team: team })
+      })
     }) // should be an array of all teams
     socket.on("add-players", (players) => {
-      let p = players.reduce((agg, cur) => (agg[cur._id] = cur), {})
+      let p = players.reduce((agg, cur) => {
+        agg[cur._id] = cur
+        return agg
+      }, {})
       setPlayers(p)
     }) // should be an array of all players
     socket.on("update-count", (cnt) => {
-      changeCount({
+      dispatchCounts({
         type: "update-count",
         team: cnt.team,
-        count: cnt.val,
+        count: cnt.val ? parseInt(cnt.val) : 0,
       })
     }) // should get alot of these...
     socket.on("settings", (sets) => {
@@ -125,34 +138,23 @@ const Viewer = () => {
     }) // whenever you submit
   }, [])
 
-  useEffect(() => {
-    setTimeout(
-      () =>
-        dispatchCounts({
-          type: "update-count",
-          team: currentTeam.name,
-          count: counts[currentTeam.name] + 1,
-        }),
-      1000
-    )
-  })
-
-  useEffect(() => {
-    console.log("teams", teams)
-    console.log("players", players)
-  }, [teams, players])
-
   return (
     <PageContainer>
       <TopLogo />
       <ViewerContainer>
         <TeamListContainer>
-          <MainContainerTop>
+          <MainContainerTop
+            style={{ borderBottom: "1px solid white", marginBottom: 10 }}
+          >
             <MainContainerTitle>Teams</MainContainerTitle>
           </MainContainerTop>
           {teams &&
-            Object.entries(teams).forEach(([key, val]) => {
-              return <h2 onClick={() => setCurrentTeam(val)}>{key.name}</h2>
+            Object.entries(teams).map(([key, val]) => {
+              return (
+                <TeamButton key={key} onClick={() => setCurrentTeam(val)}>
+                  {key}
+                </TeamButton>
+              )
             })}
         </TeamListContainer>
         <MainContainer>
@@ -205,22 +207,32 @@ const Viewer = () => {
                   <Countdown date={waitTime + 100} renderer={renderer} />
                 )}
               </UIBoolButton>
-              <TeamInfoContainer>
-                {currentTeam.players.forEach((player, i) => {
+              <TeamInfoContainer
+                style={{ border: "1px solid white", padding: 0 }}
+              >
+                <PlayersContainer style={{ borderBottom: "1px solid white" }}>
+                  <PlayerName style={{ fontSize: "1.8vw" }}>Player</PlayerName>
+                  <PlayerKills style={{ fontSize: "1.8vw" }}>
+                    Knocks
+                  </PlayerKills>
+                  <PlayerPlacement style={{ fontSize: "1.8vw" }}>
+                    placement
+                  </PlayerPlacement>
+                  <PlayerTotal style={{ fontSize: "1.8vw" }}>Total</PlayerTotal>
+                </PlayersContainer>
+                {currentTeam.players.map((player, i) => {
                   let p = players[player]
                   return (
-                    <div
-                      key={player._id}
-                      style={{
-                        backgroundColor: COLORS.BACKGROUND_LINES,
-                        border: "1px solid white",
-                      }}
-                    >
-                      <div>{p.streamerName}</div>
-                      <div>{p.attributes.kills}</div>
-                      <div>{p.attributes.placement}</div>
-                      <div>{p.attributes.placement + p.attribues.kills}</div>
-                    </div>
+                    <PlayersContainer key={player._id}>
+                      <PlayerName>{p.streamerName}</PlayerName>
+                      <PlayerKills>{p.attributes.kills}</PlayerKills>
+                      <PlayerPlacement>
+                        {p.attributes.placement}
+                      </PlayerPlacement>
+                      <PlayerTotal>
+                        {p.attributes.placement + p.attributes.kills}
+                      </PlayerTotal>
+                    </PlayersContainer>
                   )
                 })}
               </TeamInfoContainer>
