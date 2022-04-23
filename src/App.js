@@ -5,7 +5,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom"
 import Login from "./pages/Login/Login"
 import Viewer from "./pages/Viewer/Viewer"
 
-const TRACKING_ID = ""
+const TRACKING_ID = "UA-199888472-3"
 ReactGA.initialize(TRACKING_ID)
 
 function App() {
