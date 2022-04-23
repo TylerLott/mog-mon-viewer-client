@@ -84,3 +84,10 @@ export const TeamInfoContainer = styled.div`
   width: 100%;
   border-radius: 0.4em;
 `
+
+export const ThreshContainer = styled.h3`
+  margin: 0px;
+  padding: 0;
+  height: 50px;
+  font-size: 1.5em;
+`

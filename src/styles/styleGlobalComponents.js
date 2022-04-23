@@ -57,7 +57,7 @@ export const UIBoolButton = styled.button`
   margin-top: 5px;
   margin-bottom: 5px;
   margin-right: 5px;
-  width: 80%;
+  width: 60%;
   color: ${(props) => (props.track ? COLORS.BUTTON_GREEN : COLORS.BUTTON_RED)};
   background-color: rgba(0, 0, 0, 0);
   border-radius: 1em;
@@ -76,3 +76,6 @@ export const UIBoolButton = styled.button`
 `
 
 export const UIButton = styled.button``
+
+export const UITeamsContainer = styled.div``
+export const UITeamsContainerName = styled.h2``
